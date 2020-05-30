@@ -129,7 +129,65 @@ print("person_a:500, person_b:-200",np.mean(output2))
 # At the end of this task the trajectory of the node starting from the origin with the re-entry model will
 # be demonstrated and assessed.
 
-# Yet to be done, I could not do it yesterday.
+np.random.seed(1000)
+
+def sim(steps,list_steps,start,probability):
+    pos=start
+    angles=(np.pi/180)*np.arange(0,361)
+    magnitude=np.random.choice(a=list_steps,p=probability,replace=True,size=steps)
+    
+    ''' 
+        #Issue 01
+        Not sure what does it mean by discrete random variable in the range [0-2pi].
+        0-2pi is a continuous range not an integer one which can be taken as discrete.
+    '''
+    angle=np.random.choice(a=angles,replace=True,size=steps)
+    
+    #Traverse the magnitudes and angles and add the changes to x and y
+    for i in range(len(magnitude)):
+        delta_y=magnitude[i]*np.sin(angle[i])
+        delta_x=magnitude[i]*np.cos(angle[i])
+        pos[0]=pos[0]+delta_x
+        pos[1]=pos[1]+delta_y
+        if np.sqrt((pos[0]**2)+(pos[1]**2))>(10000*np.pi):
+            '''
+            #Issue 02
+            The player goes back to the origin when it hits the boundary line,
+            This will be changed as per the litreture we find
+            
+            '''
+            pos[0]=0
+            pos[1]=0
+    return pos[0],pos[1]
+        
+
+def play(generation,steps,start,list_steps=[0,0.5,1],probability=None):
+    xVals=[]
+    yVals=[]
+    dist=[]
+    for i in range(generation):
+            x_cord,y_cord=sim(steps,list_steps,start,probability)
+            xVals.append(x_cord)
+            yVals.append(y_cord)
+            dist.append(np.sqrt((x_cord**2)+(y_cord**2)))
+    return xVals,yVals,dist
+
+
+xVals,yVals,dist=play(1000,100,[0,0],probability=[0.1,0.1,0.8])
+xVals0, yVals0, dist0=play(1000,200,[0,0],probability=[0.8,0.1,0.1])
+
+pylab.plot(xVals, yVals, "r-" ,label = "Single player")
+
+pylab.plot(xVals0, yVals0, "b^" ,label = "Single player")
+pylab.title('Spots Visited on Walk ('+ "1000" + ' steps)')
+pylab.xlabel('Steps East/West of Origin')
+pylab.ylabel('Steps North/South of Origin')
+pylab.legend(loc = 'best')
+
+
+print("For a distance of 1000 steps: ")
+print("Probability= biased towards 1, expected distance:",np.mean(dist))
+print("Probability= biased towards 0, expected distance:",np.mean(dist0))
 
 
 
