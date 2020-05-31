@@ -305,3 +305,117 @@ print("Probability= biased towards 0, expected distance:",np.mean(dist0))
 
 
 # %%
+
+
+# #### Task 04
+# 
+# Repeat task 1 by assuming that the step size is a continuous uniform random variable between 0−1.Again, you may find it easier to model the PDF as a uniform random variable.
+# 
+
+# In[6]:
+
+
+import numpy as np
+import random 
+import matplotlib.pyplot as plt
+
+np.random.seed(1000)
+
+def sim(steps,list_steps,start):
+    arr=np.random.uniform(list_steps[0],list_steps[1],steps)
+    return start+np.sum(arr)  
+
+def play(generation,steps,start,list_steps=[-1,1]):
+    output=[]
+    for i in range(generation):
+            output.append(sim(steps,list_steps,start))
+    return output
+
+output3=play(1000,1000,0)
+
+
+plt.hist(output3,bins=50,alpha=0.5,label="Equal probabilities")
+plt.legend(loc="best")
+plt.show()
+
+print("For a distance of 1000 steps: ")
+print("Probability= Equal, expected distance:",np.mean(output3))
+
+
+
+# ----
+# #### Task 5
+# 
+# Repeat task 3 by assuming that the **step size and the orientation are continuous random variablesbetween 0−1 and 0−2π.**  Again,  you may find it easier to model the PDF as a uniform randomvariable.  Feel free to try other distributions
+
+# In[11]:
+
+
+import numpy as np
+import random 
+import matplotlib.pyplot as plt
+import pylab
+
+np.random.seed(1000)
+
+def sim(steps,list_steps,start):
+    pos=start
+    magnitude=np.random.uniform(list_steps[0],list_steps[1],steps)
+    angle=(np.pi/180)*np.random.uniform(0,361,steps)
+    
+    #Traverse the magnitudes and angles and add the changes to x and y
+    for i in range(len(magnitude)):
+        delta_y=magnitude[i]*np.sin(angle[i])
+        delta_x=magnitude[i]*np.cos(angle[i])
+        pos[0]=pos[0]+delta_x
+        pos[1]=pos[1]+delta_y
+        if np.sqrt((pos[0]**2)+(pos[1]**2))>(10000*np.pi):
+            '''
+            #Issue 02
+            The player goes back to the origin when it hits the boundary line,
+            This will be changed as per the litreture we find
+            
+            '''
+            pos[0]=0
+            pos[1]=0
+    return pos[0],pos[1]
+        
+
+def play(generation,steps,start,list_steps=[0,1]):
+    xVals=[]
+    yVals=[]
+    dist=[]
+    for i in range(generation):
+            x_cord,y_cord=sim(steps,list_steps,start)
+            xVals.append(x_cord)
+            yVals.append(y_cord)
+            dist.append(np.sqrt((x_cord**2)+(y_cord**2)))
+    return xVals,yVals,dist
+
+
+xVals,yVals,dist=play(1000,10,[0,0])
+xVals0, yVals0, dist0=play(1000,100,[0,0])
+xVals1, yVals1, dist1=play(1000,1000,[0,0])
+
+pylab.plot(xVals, yVals, "r-" ,label = "Single player")
+
+pylab.plot(xVals0, yVals0, "b^" ,label = "Single player")
+
+pylab.plot(xVals1, yVals1, "yo" ,label = "Single player")
+
+pylab.title('Spots Visited on Walk ('+ "1000" + ' steps)')
+pylab.xlabel('Steps East/West of Origin')
+pylab.ylabel('Steps North/South of Origin')
+pylab.legend(loc = 'best')
+
+
+print("For a distance of 1000 steps: ")
+print("10 steps, expected distance:",np.mean(dist))
+print("100 steps, expected distance:",np.mean(dist0))
+print("1000 steps, expected distance:",np.mean(dist1))
+
+
+
+# In[ ]:
+
+
