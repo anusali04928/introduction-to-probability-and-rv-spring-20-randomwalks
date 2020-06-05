@@ -18,6 +18,7 @@ import random
 import matplotlib.pyplot as plt
 import pylab
 
+
 np.random.seed(1000)
 
 
@@ -38,32 +39,8 @@ output1 = play(1000, 1000, 0, probability=[0.7, 0.1, 0.2])
 output2 = play(1000, 1000, 0, probability=[0.2, 0.1, 0.7])
 output3 = play(1000, 1000, 0, probability=[0.33, 0.34, 0.33])
 
-
-def simulation(steps, start, list_steps, probability=None):
-    bob =setupscreen()    
-    bob.pensize(3)
-    bob.pendown()
-    bob.goto(start[0], start[1])  # set starting position
-    bob.speed(1)
-
-    split = {}
-    total = 0
-
-    for i in range(len(list_steps)):
-        split[list_steps[i]] = probability[i]*100+total
-        total = total+probability[i]*100
-
-    for i in range(steps):
-        randnumber = random.randint(0, 1000)
-        randnumber = randnumber % 100
-        for i in split:
-            if split[i] >= randnumber:
-                bob.fd(i*10)
-                break
-    tk.mainloop()
-    
 def setupscreen(scren='grid', scale=3):
-
+    
     root = tk.Tk()
     START_WIDTH = 2000
     START_HEIGHT = 2000
@@ -93,6 +70,7 @@ def setupscreen(scren='grid', scale=3):
 
 
     turt = turtle.RawTurtle(canvas)
+    turt2 = turtle.RawTurtle(canvas)
 
 
     h = turtle.RawTurtle(canvas)
@@ -139,10 +117,71 @@ def setupscreen(scren='grid', scale=3):
         circle.pd()
         circle.speed(9)
         circle.circle(1000) 
-    return turt
+    return turt,turt2
 
+def simulation(steps, list_steps1, start1, probability1 , list_steps2 = None, start2 = None,probability2 = None ):
+    bob, bob2 = setupscreen()   
+    bob2.penup() 
+    bob2.hideturtle()
+    bob.pensize(3)
+    bob.goto(start1[0]*10, start1[1]*10) 
+    bob.pendown() # set starting position
+    bob.speed(1)
 
-simulation(50, (0, 0), [-1, 0, 1], [0.5, 0, 0.5])
+    if start2!=None:
+        bob2.pensize(3)
+        bob2.showturtle()
+        bob2.pencolor('blue')
+        bob2.goto(start2[0]*10, start2[1]*10)  # set starting position
+        bob2.speed(1)
+        bob2.pendown()
+
+    split1 = {} 
+    split2 = {}
+    total1 = 0
+    for i in range(len(list_steps1)):
+        split1[list_steps1[i]] = probability1[i]*100+total1
+        total1 = total1 + probability1[i]*100
+    
+    if start2!=None:
+        total2 = 0
+        for i in range(len(list_steps2)):
+            split2[list_steps2[i]] = probability2[i]*100+total2
+            total2 = total2 + probability2[i]*100
+       
+  
+    for x in range(steps):
+            
+
+            randnumber = random.randint(0, 1000)
+            randnumber = randnumber % 100
+
+            randnumber2 = random.randint(0, 1000)
+            randnumber2 = randnumber2 % 100
+            for i in split1:
+                if split1[i] >= randnumber:
+                    bob.fd(i*10)
+                    break
+
+            if start2!=None:
+                for j in split2:               
+                    if split2[j] >= randnumber2:
+                        bob2.fd(j*10)
+                        break
+                    if bob.pos() == bob2.pos():
+                        break
+            
+                if bob.pos() == bob2.pos():
+                    print('Time for collision is '+ str(x)+" Time Units")
+                    break
+
+    print('Final cordinates are ('+ str(bob.xcor()//10)+","+str(bob.ycor()//10)+")")
+        
+
+    tk.mainloop()
+    
+#simulation(500,  [-1, 0, 1],(0, 0),[0.5, 0, 0.5]) # run for task 1
+#simulation(500,  [-1, 0, 1],(0, 0),[0.5, 0, 0.5], [-1, 0, 1],(5,0), [0.5, 0, 0.5]) # run for task 2
 plt.hist(output3, bins=50, alpha=0.5, label="Equal probabilities")
 plt.legend(loc="best")
 # plt.show()
