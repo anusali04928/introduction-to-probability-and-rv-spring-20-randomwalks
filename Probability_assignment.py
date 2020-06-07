@@ -457,4 +457,122 @@ print("1000 steps, expected distance:",np.mean(dist1))
 
 # In[ ]:
 
+# ###Task 07
+
+np.random.seed(1000)
+
+def sim(steps,list_steps,start,probability):
+    pos=start
+    angles=(np.pi/180)*np.arange(0,361)
+    magnitude=np.random.choice(a=list_steps,p=probability,replace=True,size=steps)
+    angle=(np.pi/180)*np.random.uniform(0,361,steps)
+    
+    #Traverse the magnitudes and angles and add the changes to x and y
+    for i in range(len(magnitude)):
+        delta_y=magnitude[i]*np.sin(angle[i])
+        delta_x=magnitude[i]*np.cos(angle[i])
+        pos[0]=pos[0]+delta_x
+        pos[1]=pos[1]+delta_y
+        if np.sqrt((pos[0]**2)+(pos[1]**2))>(10000*np.pi):
+            '''
+            #Issue 02
+            The player goes back to the origin when it hits the boundary line,
+            This will be changed as per the litreture we find
+            
+            '''
+            pos[0]=0
+            pos[1]=0
+    return pos[0],pos[1]
+        
+
+def play(generation,steps,start,list_steps=[0,0.5,1],probability=None):
+    xVals=[]
+    yVals=[]
+    dist=[]
+    for i in range(generation):
+            x_cord,y_cord=sim(steps,list_steps,start,probability)
+            xVals.append(x_cord)
+            yVals.append(y_cord)
+            dist.append(np.sqrt((x_cord**2)+(y_cord**2)))
+    return xVals,yVals,dist
+
+
+xVals,yVals,dist=play(1000,100,[0,0],probability=[0.1,0.1,0.8])
+xVals0, yVals0, dist0=play(1000,200,[0,0],probability=[0.8,0.1,0.1])
+
+pylab.plot(xVals, yVals, "r-" ,label = "Single player")
+
+pylab.plot(xVals0, yVals0, "b^" ,label = "Single player")
+pylab.title('Spots Visited on Walk ('+ "1000" + ' steps)')
+pylab.xlabel('Steps East/West of Origin')
+pylab.ylabel('Steps North/South of Origin')
+pylab.legend(loc = 'best')
+
+
+print("For a distance of 1000 steps: ")
+print("Probability= biased towards 1, expected distance:",np.mean(dist))
+print("Probability= biased towards 0, expected distance:",np.mean(dist0))
+
+
+# ##Task08
+
+np.random.seed(1000)
+
+def sim(list_steps,start):
+    iterations=0
+    pos0=[start[0],start[1]]
+    pos1=[start[2],start[3]]
+    
+    #Traverse the magnitudes and angles and add the changes to x and y
+    while  np.sqrt((pos0[0]**2)+(pos0[1]**2))>1:
+        
+        magnitude0=np.random.uniform(list_steps[0],list_steps[1],1)
+        angle0=(np.pi/180)*np.random.uniform(0,361,1)
+    
+        magnitude1=np.random.uniform(list_steps[0],list_steps[1],1)
+        angle1=(np.pi/180)*np.random.uniform(0,361,1)
+        
+        delta_y0=magnitude0[0]*np.sin(angle0[0])
+        delta_x0=magnitude0[0]*np.cos(angle0[0])
+        
+        delta_y1=magnitude1[0]*np.sin(angle1[0])
+        delta_x1=magnitude1[0]*np.cos(angle1[0])
+        
+        pos0[0]=pos0[0]+delta_x0
+        pos0[1]=pos0[1]+delta_y0
+        
+        pos1[0]=pos1[0]+delta_x1
+        pos1[1]=pos1[1]+delta_y1
+        
+        iterations+=1
+        
+        if np.sqrt((pos0[0]**2)+(pos0[1]**2))>(1000*np.pi):
+            '''
+            #Issue 02
+            The player goes back to the origin when it hits the boundary line,
+            This will be changed as per the litreture we find
+            
+            '''
+            pos0=[0,0]
+            pos1=[0,0]
+    return iterations
+        
+
+def play(generation,list_steps=[0,1]):
+    iterations=[]
+    for i in range(generation):
+            start=np.random.uniform(0,100,4)
+            iteration=sim(list_steps,start)
+            iterations.append(iteration)
+    return iterations
+
+
+iterations=play(1000)
+
+plt.hist(iterations,bins=50,alpha=0.5,label="Randomly chosen starting points")
+plt.legend(loc="best")
+plt.show()
+
+
+
 
