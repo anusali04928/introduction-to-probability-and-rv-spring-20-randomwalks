@@ -11,7 +11,7 @@
 #
 
 # In[3]:
-
+import tkinter as tk
 import turtle
 import numpy as np
 import random
@@ -39,10 +39,7 @@ output3 = play(1000, 1000, 0, probability=[0.33, 0.34, 0.33])
 
 
 def simulation(steps, start, list_steps, probability=None):
-    window = turtle.Screen()  # Screen
-    window.bgcolor("white")
-    window.title("Walk of Life Simulation")
-    bob = turtle.Turtle()  # Drawing tool
+    bob =setupscreen()    
     bob.pensize(3)
     bob.pendown()
     bob.goto(start[0], start[1])  # set starting position
@@ -50,7 +47,7 @@ def simulation(steps, start, list_steps, probability=None):
 
     split = {}
     total = 0
-    setupscreen()
+
     for i in range(len(list_steps)):
         split[list_steps[i]] = probability[i]*100+total
         total = total+probability[i]*100
@@ -60,50 +57,91 @@ def simulation(steps, start, list_steps, probability=None):
         randnumber = randnumber % 100
         for i in split:
             if split[i] >= randnumber:
-                bob.fd(i*20)
+                bob.fd(i*10)
                 break
-    turtle.Screen().exitonclick()
+    tk.mainloop()
+    
+def setupscreen(scren='grid', scale=3):
+
+    root = tk.Tk()
+    START_WIDTH = 2000
+    START_HEIGHT = 2000
+
+    frame = tk.Frame(root, width=START_WIDTH, height=START_HEIGHT)
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
+
+    xscrollbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
+    xscrollbar.grid(row=1, column=0, sticky=tk.E+tk.W)
+
+    yscrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
+    yscrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
+
+    canvas = tk.Canvas(frame, width=START_WIDTH, height=START_HEIGHT,
+                        scrollregion=(0, 0, START_WIDTH, START_HEIGHT),
+                        xscrollcommand=xscrollbar.set,
+                        yscrollcommand=yscrollbar.set)
+
+    canvas.grid(row=0, column=0, sticky=tk.N +
+                tk.S+tk.E+tk.W)
+
+    xscrollbar.config(command=canvas.xview)
+    yscrollbar.config(command=canvas.yview)
+
+    frame.pack()
 
 
-def setupscreen():
+    turt = turtle.RawTurtle(canvas)
 
-    h = turtle.Pen()
-    w = turtle.Pen()
-    Line_distance = 880
-    line_space = 20
+
+    h = turtle.RawTurtle(canvas)
+    w = turtle.RawTurtle(canvas)
+
+    line_space = 10
     h.penup()
     w.penup()
-    h.goto(-400, 400)
-    w.goto(-400, -400)
-    h.speed(10)
-    w.speed(10)
+    h.goto(-1000, 1000)
+    w.goto(-1000, 1000)
+    h.speed(0)
+    w.speed(0)
     h.pd()
     w.pd()
-    w.left(90)
-    total_lines = 40
+    w.right(90)
+    total_lines = 200
+    Line_distance = total_lines*line_space
     for i in range(total_lines):
         if i == total_lines//2:
 
-            for j in range(Line_distance//(total_lines//2)):
-                h.fd(line_space)
-                h.write(j-(total_lines//2-1))
-                w.fd(line_space)
-                w.write(j-(total_lines//2))
+            for j in range(int(total_lines)):
+                    h.fd(line_space)
+                    h.write(abs(j-((total_lines//2)-1)))
+                    w.fd(line_space)
+                    w.write((total_lines//2)-j)
 
         else:
 
-            h.fd(Line_distance)
-            w.fd(Line_distance)
+                h.fd(Line_distance)
+                w.fd(Line_distance)
 
         h.pu()
         w.pu()
-        h.goto(-440, h.ycor()-line_space)
-        w.goto(w.xcor()+line_space, -440)
+        h.goto(-1000, h.ycor()-line_space)
+        w.goto(w.xcor()+line_space, 1000)
         h.pd()
         w.pd()
+        
+    if scren == 'circle':
+        
+        circle = turtle.RawTurtle(canvas)
+        circle.pu()
+        circle.goto(0,-1000)
+        circle.pd()
+        circle.speed(9)
+        circle.circle(1000) 
+    return turt
 
 
-simulation(100, (0, 0), [-1, 0, 1], [0.5, 0, .5])
+simulation(50, (0, 0), [-1, 0, 1], [0.5, 0, 0.5])
 plt.hist(output3, bins=50, alpha=0.5, label="Equal probabilities")
 plt.legend(loc="best")
 # plt.show()
@@ -144,34 +182,34 @@ plt.legend(loc="best")
 # In[ ]:
 
 
-def sim(start_a,start_b,probability_a,probability_b):
-    list_steps=[1,0,-1]
-    pos_a=start_a
-    pos_b=start_b
-    time_count=0
-    while pos_a!=pos_b:
-        time_count+=1
-        pos_a+=np.random.choice(a=list_steps,p=probability_a,replace=True)
-        pos_b+=np.random.choice(a=list_steps,p=probability_b,replace=True)
+def sim(start_a, start_b,probability_a,probability_b):
+    list_steps = [1,0,-1]
+    pos_a = start_a
+    pos_b = start_b
+    time_count = 0
+    while pos_a !=pos_b:
+        time_count += 1
+        pos_a += np.random.choice(a=list_steps,p=probability_a,replace=True)
+        pos_b += np.random.choice(a=list_steps,p=probability_b,replace=True)
     return time_count
 
-def play(generation,start,probability):
-    output=[]
+def play(generation, start,probability):
+    output = []
     for i in range(generation):
-            output.append(sim(start[0],start[1],probability[0],probability[1]))
+        output.append(sim(start[0], start[1],probability[0],probability[1]))
     return output
 
-output1=play(100,[0,50],[[0.7,0.1,0.2],[0.2,0.4,0.4]])
-output2=play(100,[500,-200],[[0.7,0.1,0.2],[0.2,0.4,0.4]])
+output1 = play(100,[0,50],[[0.7,0.1,0.2],[0.2,0.4,0.4]])
+output2 = play(100,[500,-200],[[0.7,0.1,0.2],[0.2,0.4,0.4]])
 
-plt.hist(output3,bins=50,alpha=0.5,label="person_a:0, person_b:50")
-plt.hist(output3,bins=50,alpha=0.5,label="person_a:500, person_b:-200")
+plt.hist(output3, bins=50,alpha=0.5,label="person_a:0, person_b:50")
+plt.hist(output3, bins=50,alpha=0.5,label="person_a:500, person_b:-200")
 plt.legend(loc="best")
 plt.show()
 
 print("For a distance of 1000 instances: ")
-print("person_a:0, person_b:50",np.mean(output1))
-print("person_a:500, person_b:-200",np.mean(output2))
+print("person_a:0, person_b:50", np.mean(output1))
+print("person_a:500, person_b:-200", np.mean(output2))
 
 
 # ---
